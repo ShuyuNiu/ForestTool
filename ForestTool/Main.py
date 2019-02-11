@@ -16,8 +16,6 @@ os_is_windows = platform.system() == 'Windows'
 
 #程序入口
 def main():
-	#reload(sys)
-	#sys.setdefaultencoding('utf-8');
 	print(u'欢迎使用ForestTool')
 	try:
 	    with open('user_login.txt', 'r') as f:
@@ -41,7 +39,7 @@ def gbk_encode(str):
 
 #获取用户输入的账号和密码
 def get_login():
-	account = raw_input(gbk_encode('请输入您的账号:')).decode(sys.stdin.encoding)
+	account = raw_input(gbk_encode('请输入您的账号: ')).decode(sys.stdin.encoding)
 	pwd = raw_input(gbk_encode('请输入您的密码: ')).decode(sys.stdin.encoding)
 	return {'account':account,'pwd':pwd}
 
