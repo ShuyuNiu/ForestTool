@@ -158,7 +158,7 @@ def add_per_time(add_time_data,note,tree_type,user,per_add_count):
 	else:
 		get_res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/plants/updated_plants?seekruid='+ str(user.user_id)+'&update_since='+time_now.isoformat()+'/',{},'',user.remember_token,'GET')
 		now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-		print('【%s】'+u'第%d棵树种植成功！！'%now_time%per_add_count)
+		print(u'【%s】第%d棵树种植成功！！'%(now_time,1))
 		
 #刷金币功能
 def add_coin_task(user):
