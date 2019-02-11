@@ -9,9 +9,15 @@ from datetime import datetime,timedelta
 import sched
 import sys
 import os
+import platform
+
+#是否是Windows
+os_is_windows = platform.system() == 'Windows'
 
 #程序入口
 def main():
+	#reload(sys)
+	#sys.setdefaultencoding('utf-8');
 	print(u'欢迎使用ForestTool')
 	try:
 	    with open('user_login.txt', 'r') as f:
@@ -26,30 +32,37 @@ def main():
 	    login_input = get_login()
 	login(login_input)
 
+#根据系统获取raw_input中文编码结果
+def gbk_encode(str):
+	if os_is_windows:
+		return str.decode('utf-8').encode('gbk')
+	else:
+		return str
+
 #获取用户输入的账号和密码
 def get_login():
-	account = raw_input(u"请输入您的账号: ")
-	pwd = raw_input(u"请输入您的密码: ")
+	account = raw_input(gbk_encode('请输入您的账号:')).decode(sys.stdin.encoding)
+	pwd = raw_input(gbk_encode('请输入您的密码: ')).decode(sys.stdin.encoding)
 	return {'account':account,'pwd':pwd}
 
 #获取批量植树功能的用户选择信息
 def get_add_time():
-	add_time = raw_input(u"请输入专注时间（分钟）: ")
-	tree_type = raw_input(u"请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ")
-	note = raw_input(u"请输入此任务备注: ")
-	add_count = raw_input(u"请输入批量植树数量: ")
+	add_time = raw_input(gbk_encode('请输入专注时间（分钟）: '))
+	tree_type = raw_input(gbk_encode('请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ')).decode(sys.stdin.encoding)
+	note = raw_input(gbk_encode('请输入此任务备注: ')).decode(sys.stdin.encoding)
+	add_count = raw_input(gbk_encode('请输入批量植树数量: ')).decode(sys.stdin.encoding)
 	return {'add_time':add_time,'tree_type':tree_type,'note':note,'add_count':add_count}
 
 #获取刷金币功能的用户选择信息
 def get_coin_task():
-	add_time = raw_input(u"请输入每棵树种植时间（分钟）【5-120分钟，每5分钟一阶段，每增加1阶段多1金币，第一阶段2金币】: ")
-	tree_type = raw_input(u"请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ")
-	note = raw_input(u"请输入此任务备注: ")
+	add_time = raw_input(gbk_encode('请输入每棵树种植时间（分钟）【5-120分钟，每5分钟一阶段，每增加1阶段多1金币，第一阶段2金币】: ')).decode(sys.stdin.encoding)
+	tree_type = raw_input(gbk_encode('请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ')).decode(sys.stdin.encoding)
+	note = raw_input(gbk_encode('请输入此任务备注: ')).decode(sys.stdin.encoding)
 	return {'add_time':add_time,'tree_type':tree_type,'note':note}
 
 #获取用户选择菜单的信息
 def get_mode():
-	mode_input = raw_input(u"请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.使用其他账号登录 4.退出ForestTool:")
+	mode_input = raw_input(gbk_encode('请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.使用其他账号登录 4.退出ForestTool: ')).decode(sys.stdin.encoding)
 	return mode_input
 
 #前往菜单
