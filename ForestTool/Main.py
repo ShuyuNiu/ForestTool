@@ -10,6 +10,7 @@ import sched
 import sys
 import os
 
+#程序入口
 def main():
 	print(u'欢迎使用ForestTool')
 	try:
@@ -25,11 +26,13 @@ def main():
 	    login_input = get_login()
 	login(login_input)
 
+#获取用户输入的账号和密码
 def get_login():
 	account = raw_input("请输入您的账号: ")
 	pwd = raw_input("请输入您的密码: ")
 	return {'account':account,'pwd':pwd}
 
+#获取批量植树功能的用户选择信息
 def get_add_time():
 	add_time = raw_input("请输入专注时间（分钟）: ")
 	tree_type = raw_input("请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ")
@@ -37,14 +40,19 @@ def get_add_time():
 	add_count = raw_input("请输入批量植树数量: ")
 	return {'add_time':add_time,'tree_type':tree_type,'note':note,'add_count':add_count}
 
+#获取刷金币功能的用户选择信息
 def get_coin_task():
 	add_time = raw_input("请输入每棵树种植时间（分钟）【5-120分钟，每5分钟一阶段，每增加1阶段多1金币，第一阶段2金币】: ")
 	tree_type = raw_input("请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ")
 	note = raw_input("请输入此任务备注: ")
 	return {'add_time':add_time,'tree_type':tree_type,'note':note}
+
+#获取用户选择菜单的信息
 def get_mode():
 	mode_input = raw_input("请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.使用其他账号登录 4.退出ForestTool:")
 	return mode_input
+
+#前往菜单
 def to_menu(user):
 	while(True):
 	   		mode_input = get_mode()
@@ -63,6 +71,7 @@ def to_menu(user):
 	   		else:
 	   			print('您的输入不合法，请输入选择！！')
 
+#用户登录
 def login(login_input):
 	post_json = {
 	'session':{
@@ -89,6 +98,7 @@ def login(login_input):
    		print(u'登录失败，账号或密码错误，请重新输入！！')
    		login(get_login())
 
+#批量植树功能
 def add_time(user):
 	add_time_input = get_add_time()
 	add_time_data = int(add_time_input['add_time'])
@@ -103,7 +113,7 @@ def add_time(user):
 		time.sleep(1)
 	to_menu(user)
 			
-	
+#种植一棵树	
 def add_per_time(add_time_data,note,tree_type,user,per_add_count):
 	time_now = datetime.now()
 	time_now = time_now - timedelta(hours = 8)
@@ -138,7 +148,7 @@ def add_per_time(add_time_data,note,tree_type,user,per_add_count):
 		get_res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/plants/updated_plants?seekruid='+ str(user.user_id)+'&update_since='+time_now.isoformat()+'/',{},'',user.remember_token,'GET')
 		print('第%d棵树种植成功！！'%per_add_count)
 		
-
+#刷金币功能
 def add_coin_task(user):
 	get_coin_input = get_coin_task()
 	add_time = int(get_coin_input['add_time'])
