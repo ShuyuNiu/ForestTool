@@ -10,9 +10,14 @@ import sched
 import sys
 import os
 import platform
+from dateutil.parser import parse
 
 #是否是Windows
 os_is_windows = platform.system() == 'Windows'
+
+#种植成功时间
+global plant_succ_time
+plant_succ_time = datetime.now()
 
 #程序入口
 def main():
@@ -58,9 +63,17 @@ def get_coin_task():
 	note = raw_input(gbk_encode('请输入此任务备注: ')).decode(sys.stdin.encoding)
 	return {'add_time':add_time,'tree_type':tree_type,'note':note}
 
+#获取刷金币功能的用户选择信息
+def get_dis_add():
+	start_time = raw_input(gbk_encode('请输入开始时间（格式：\'2019-01-01/11:11:11\'）: ')).decode(sys.stdin.encoding)
+	end_time = raw_input(gbk_encode('请输入结束时间（格式：\'2019-01-01/11:11:11\'）: ')).decode(sys.stdin.encoding)
+	tree_type = raw_input(gbk_encode('请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉】，无论是否已购买都可以种植，超出30的植物有兴趣可以自行测试: ')).decode(sys.stdin.encoding)
+	note = raw_input(gbk_encode('请输入此任务备注: ')).decode(sys.stdin.encoding)
+	return {'start_time':start_time,'end_time':end_time,'tree_type':tree_type,'note':note}
+
 #获取用户选择菜单的信息
 def get_mode():
-	mode_input = raw_input(gbk_encode('请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.使用其他账号登录 4.退出ForestTool: ')).decode(sys.stdin.encoding)
+	mode_input = raw_input(gbk_encode('请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.根据时间区间植树 4.使用其他账号登录 5.退出ForestTool: ')).decode(sys.stdin.encoding)
 	return mode_input
 
 #前往菜单
@@ -74,9 +87,12 @@ def to_menu(user):
 	   			add_time(user)
 	   			break
 	   		elif mode_input == '3':
-	   			login(get_login())
+	   			add_dis_time(user)
 	   			break
 	   		elif mode_input == '4':
+	   			login(get_login())
+	   			break
+	   		elif mode_input == '5':
 	   			exit(0)
 	   			break
 	   		else:
@@ -120,18 +136,26 @@ def add_time(user):
 	curr_count = 0
 	while curr_count<add_count:
 		curr_count = curr_count+1
-		add_per_time(add_time_data,note,tree_type,user,curr_count)
+		add_per_time(add_time_data,note,tree_type,user,curr_count,'','')
 		time.sleep(1)
 	to_menu(user)
 			
 #种植一棵树	
-def add_per_time(add_time_data,note,tree_type,user,per_add_count):
+def add_per_time(add_time_data,note,tree_type,user,per_add_count,start_time,end_time):
 	time_now = datetime.now()
 	time_now = time_now - timedelta(hours = 8)
-	time_pass = time_now - timedelta(minutes = add_time_data) 
+	time_pass = time_now - timedelta(minutes = add_time_data)
+	if len(start_time):
+		s_start_time = start_time
+	else:
+		s_start_time = time_pass.isoformat()
+	if len(end_time):
+		s_end_time = end_time
+	else:
+		s_end_time = time_now.isoformat()
 	post_json = {
 		"plant": {
-			"end_time": time_now.isoformat(),
+			"end_time": s_end_time,
 			"longitude": 0,
 			"note": note,
 			"is_success": 1,
@@ -140,7 +164,7 @@ def add_per_time(add_time_data,note,tree_type,user,per_add_count):
 			"tag": 0,
 			"latitude": 0,
 			"has_left": 0,
-			"start_time": time_pass.isoformat(),
+			"start_time": s_start_time,
 			"trees": [{
 				"phase": 4,
 				"theme": 0,
@@ -157,8 +181,10 @@ def add_per_time(add_time_data,note,tree_type,user,per_add_count):
 		print(u'植树失败！！返回信息：'+post_res)
 	else:
 		get_res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/plants/updated_plants?seekruid='+ str(user.user_id)+'&update_since='+time_now.isoformat()+'/',{},'',user.remember_token,'GET')
-		now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-		print(u'【%s】第%d棵树种植成功！！'%(now_time,per_add_count))
+		now_time = datetime.now()
+		print(u'【%s】第%d棵树种植成功！！'%(now_time.strftime("%Y-%m-%d %H:%M:%S"),per_add_count))
+		global plant_succ_time
+		plant_succ_time = now_time;
 		
 #刷金币功能
 def add_coin_task(user):
@@ -174,22 +200,38 @@ def add_coin_task(user):
 	total_time = 0
 	curr_count = 1
 	while True:
-		if total_time == 0 or total_time % (add_time * 60) == 0:
-		    add_per_time(add_time,note,tree_type,user,curr_count)
+		if curr_count == 1 or (not total_time == 0 and total_time % (add_time * 60) == 0):
+		    add_per_time(add_time,note,tree_type,user,curr_count,'','')
 		    curr_count = curr_count+1
 		    get_res_sub = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/users/'+str(user.user_id)+'/coin?seekruid='+ str(user.user_id),{},'',user.remember_token,'GET')
 		    print(u'您当前金币数：'+str(get_res_sub['coin'])+u'(赚得金币数：'+str(get_res_sub['coin']-get_res['coin'])+')')
-		total_time = total_time+1
-		if total_time == add_time * 60:
-			total_time = 0
-		if not total_time == 0:
+		global plant_succ_time
+		total_time = int((datetime.now()-plant_succ_time).total_seconds())
+		if not total_time == add_time * 60:
 			sys.stdout.write('\r'+u'距离下一棵树种植时间 :' + str(add_time * 60 - total_time).zfill(len(str(add_time * 60))),) 
         	sys.stdout.flush()
-			#print('距离下一棵树种植时间 :'+str(600 - total_time),)
-			#print('\r')
-		if total_time == 0:
+		if total_time == add_time * 60:
 			print('')
 	   	time.sleep(1)
 
+#根据时间区间种植树
+def add_dis_time(user):
+	get_dis_input = get_dis_add()
+	start_time = parse(get_dis_input['start_time'])
+	end_time = parse(get_dis_input['end_time'])
+	tree_type = get_dis_input['tree_type']
+	note = get_dis_input['note']
+	s_start_time = start_time
+	curr_count = 0
+	while True:
+		curr_count = curr_count+1
+		add_per_time(10,note,tree_type,user,curr_count,s_start_time.isoformat(),(s_start_time + timedelta(minutes = 10)).isoformat())
+		s_start_time = s_start_time + timedelta(minutes = 10)
+		print('下一棵树对应需求时间：'+s_start_time.strftime("%Y-%m-%d %H:%M:%S"))
+		if int((end_time - s_start_time).total_seconds()) < 10:
+			print(u'执行完毕！！')
+			break;
+
+		time.sleep(1)
 main()
 
