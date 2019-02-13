@@ -7,13 +7,13 @@
 #### 安装必要的模块 pip install Requests，pip install python-dateutil
 #### cd进入Main.py所在文件夹，python Main.py
 ***
-### 示例截图：
-![Image text](http://www.zxlee.cn/forestToolDemo1.png)  
-
-***
 ### 主要功能：
 #### 可选择时间区间，种植过去时间的树苗
 #### 可从现在时间开始，一直自动种植树苗
 #### 可直接大批量种植树苗，但时间会重叠
 ***
+### 示例截图：
+![Image text](http://www.zxlee.cn/forestToolDemo1.png)  
+***
+
 #### 注：批量种植可一次性种植大批量树苗，但重叠部分时间不会纳入金币奖励及排行榜计算！
