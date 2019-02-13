@@ -222,12 +222,14 @@ def add_dis_time(user):
 	tree_type = get_dis_input['tree_type']
 	note = get_dis_input['note']
 	s_start_time = start_time
+	s_start_time = s_start_time - timedelta(hours = 8)
+	end_time = end_time - timedelta(hours = 8)
 	curr_count = 0
 	while True:
 		curr_count = curr_count+1
 		add_per_time(10,note,tree_type,user,curr_count,s_start_time.isoformat(),(s_start_time + timedelta(minutes = 10)).isoformat())
 		s_start_time = s_start_time + timedelta(minutes = 10,seconds = 1)
-		print('下一棵树对应需求时间：'+s_start_time.strftime("%Y-%m-%d %H:%M:%S"))
+		print('下一棵树对应需求时间：'+(s_start_time + timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S"))
 		if int((end_time - s_start_time).total_seconds()) < 10:
 			print(u'执行完毕！！')
 			break;
