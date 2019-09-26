@@ -109,8 +109,8 @@ def login(login_input):
 
 	}
 	print(u'正在登录，请稍后...')
-   	res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/sessions',{},post_json,'','POST')
-   	if res.has_key('remember_token'):
+	res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/sessions',{},post_json,'','POST')
+	if res.has_key('remember_token'):
    		user = User(res['user_name'],res['user_id'],res['remember_token'])
    		print (u'登录成功！！欢迎您，'+ res['user_name'])
    		try:
