@@ -1,0 +1,13 @@
+.idea/
+__pycache__/
+
+.DS_Store
+*.pyc
+*.swp
+**/migrations/
+
+.qiniu_pythonsdk_hostscache.json
+.vscode/.ropeproject/
+.python-version
+
+user_login.txt

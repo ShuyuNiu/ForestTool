@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import sys
 import platform
 from dateutil.parser import parse
+import csv
 
 # 是否是Windows
 os_is_windows = platform.system() == 'Windows'
@@ -16,7 +17,7 @@ os_is_windows = platform.system() == 'Windows'
 global plant_succ_time
 plant_succ_time = datetime.now()
 
-tree_type_str = "请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉 31.新年竹 32.地球樹 33.康乃馨 34.頻果樹 35.星空樹 36.咕咕鐘 37.月亮樹 38.彩虹花 39.幽靈草 40.藍色橡樹 41.橡樹】，无论是否已购买都可以种植，超出 30 的植物有兴趣可以自行测试: "
+tree_type_str = "请选择植物类型【1.开花的树 2.树屋 3.鸟巢 4.柠檬树 5.三兄弟 6.树丛 7.章鱼 8.樱花 9.椰子树 10.猫咪 11.一株很大的草 12.中国松 13.仙人掌球 14.南瓜 15.稻草人 16.圣诞树 17.中国新年竹 18.蘑菇 19.仙人掌 20.银杏 21.紫藤 22.西瓜 23.竹子 24.糖果树 25.向日葵 26.玫瑰 27.枫树 28.面包树 29.大王花 30.香蕉 31.新年竹 32.地球樹 33.康乃馨 34.頻果樹 35.星空樹 36.咕咕鐘 37.月亮樹 38.彩虹花 39.幽靈草 40.藍色橡樹 41.橡樹 42.粉紅色橡樹 43.黃色橡樹 44.紫色橡樹 45.銀柳 46.小藍花 47.星星珊瑚 48.巧克力草莓蛋糕 49.櫻桃起司蛋糕 50.提拉米蘇 51.抹茶紅豆蛋糕 52.檸檬蛋糕 53.黑森林蛋糕 54.藍莓蛋糕 55.草莓戚風蛋糕 56.蛋糕樹 57.狗狗樹 58.熊童子 59.煙火樹 60.獨角獸樹 61.太空樹 62.仙樹 63.楊柳 64.幸運草 65.森林之心 66.六週年蛋糕樹 67.水之心 68.聖代樹 69.情人樹 70.梨子樹屋 71.女巫魔菇】，无论是否已购买都可以种植，超出數字的植物有兴趣可以自行测试: "
 
 
 # 程序入口
@@ -85,9 +86,18 @@ def get_minutes_tree():
     return {'start_time': start_time, 'minutes': minutes, 'tree_type': tree_type, 'note': note}
 
 
+def get_csv_file():
+    print('支援的csv內容：start_time（開始時間，2019-01-01/11:11:11）、minutes（分鐘數）、tree_type（樹的種類）、note（備註）')
+    print('tree_type 為：', tree_type_str)
+    file_name = input('請輸入csv檔案路徑: ')
+    csvfile = open(file_name, newline='')
+    rows = csv.DictReader(csvfile)
+    return rows
+
+
 # 获取用户选择菜单的信息
 def get_mode():
-    mode_input = input('请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.根据时间区间植树 4.使用其他账号登录 5.退出ForestTool 6.根據分鐘數種樹: ')
+    mode_input = input('请选择您要进行的操作: 1.自动刷金币 2.批量植树 3.根据时间区间植树 4.使用其他账号登录 5.根據分鐘數種樹 6.使用csv檔批量種樹 7.退出ForestTool: ')
     return mode_input
 
 
@@ -95,24 +105,18 @@ def get_mode():
 def to_menu(user):
     while(True):
         mode_input = get_mode()
-        if mode_input == '1':
-            add_coin_task(user)
-            break
-        elif mode_input == '2':
-            add_time(user)
-            break
-        elif mode_input == '3':
-            add_dis_time(user)
-            break
-        elif mode_input == '4':
-            login(get_login())
-            break
-        elif mode_input == '5':
-            exit(0)
-            break
-        elif mode_input == '6':
-            add_minutes_tree(user)
-            break
+        funcs = {
+            '1': lambda user: add_coin_task(user),
+            '2': lambda user: add_time(user),
+            '3': lambda user: add_dis_time(user),
+            '4': lambda user: login(get_login()),
+            '5': lambda user: add_minutes_tree(user),
+            '6': lambda user: csv_minutes_tree(user),
+            '7': lambda user: exit(0),
+        }
+        func = funcs.get(mode_input)
+        if func:
+            func(user)
         else:
             print(u'您的输入不合法，请输入选择！！')
 
@@ -131,7 +135,7 @@ def login(login_input):
     res = HttpReq.send_req('https://c88fef96.forestapp.cc/api/v1/sessions', {}, post_json, '', 'POST')
     if 'remember_token' in res:
         user = User(res['user_name'], res['user_id'], res['remember_token'])
-        print (u'登录成功！！欢迎您，' + res['user_name'])
+        print(u'登录成功！！欢迎您，' + res['user_name'])
         try:
             with open('user_login.txt', 'w') as f:
                 f.write(login_input['account'] + '\n')
@@ -260,26 +264,40 @@ def add_dis_time(user):
 
 # 根據分鐘數種樹
 def add_minutes_tree(user):
-    get_minutes_input = get_minutes_tree()
-    start_time = parse(get_minutes_input['start_time'])
-    minutes = int(get_minutes_input['minutes'])
-    tree_type = get_minutes_input['tree_type']
-    note = get_minutes_input['note']
-    s_start_time = start_time
-    s_start_time = s_start_time - timedelta(hours=8)
-    s_minutes = minutes
-    curr_count = 0
-    while s_minutes > 0:
-        curr_count = curr_count + 1
-        real_minutes = min(s_minutes, 120)
-        if 120 < s_minutes < 130:
-            real_minutes -= 10
-        add_per_time(real_minutes, note, tree_type, user, curr_count, s_start_time.isoformat(), (s_start_time + timedelta(minutes=real_minutes)).isoformat())
-        s_start_time += timedelta(minutes=real_minutes, seconds=1)
-        s_minutes -= real_minutes
-        print('下一棵树对应需求时间：' + (s_start_time + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S"))
-        time.sleep(1)
+    get_input = get_minutes_tree()
+    per_minutes_tree(user, get_input)
     print(u'执行完毕！！')
+
+
+# 使用csv檔種樹
+def csv_minutes_tree(user):
+    rows = get_csv_file()
+    for row in rows:
+        per_minutes_tree(user, row)
+    print(u'执行完毕！！')
+
+
+# 每天的分鐘種樹
+def per_minutes_tree(user, get_input):
+    utc_start_time = parse(get_input['start_time']) - timedelta(hours=8)
+    minutes = int(get_input['minutes'])
+    tree_type = get_input['tree_type']
+    note = get_input.get('note', '')
+    curr_count = 0
+    while minutes > 0:
+        curr_count += 1
+        real_minutes = min(minutes, 120)
+        # 避免下棵樹在 130 < m < 120, m - 120 = 9~1
+        if 120 < minutes < 130:
+            real_minutes -= 10
+        end_time = utc_start_time + timedelta(minutes=real_minutes)
+        add_per_time(real_minutes, note, tree_type, user, curr_count, utc_start_time.isoformat(), end_time.isoformat())
+        # 下次種植用
+        utc_start_time = end_time + timedelta(seconds=1)
+        minutes -= real_minutes
+        # 顯示改回 UTC+8
+        print('下一棵树对应需求时间：' + (utc_start_time + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S"))
+        time.sleep(1)
 
 
 main()

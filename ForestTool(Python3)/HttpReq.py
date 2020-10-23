@@ -5,7 +5,6 @@ import json
 import requests
 from requests.cookies import RequestsCookieJar
 import urllib
-import httplib
 
 
 def json_dic(json_str):
